@@ -4,7 +4,6 @@
 # current implimentation requires finite action space
 # works on many atari games, though hyperparamter search likely needed
 
-import copy
 import gym
 from gym import wrappers
 import os
