@@ -1,3 +1,1 @@
-This repository contains the scripts I wrote for a real time strategy game run in Unity. Additional project settings and setup files, required to get the project running in Unity, are not contained here but may be available upon request. 
-
-For the most interesting scripts, see those pertaining to [unit behavior](Assets/WorldObject/Behavior) and [unit state](Assets/WorldObject/StateScripts/UnitStates)
+This repository contains personal adaptations of machine learning alogorithms covered in an advanced reinforcement learning course: https://www.udemy.com/deep-reinforcement-learning-in-python/learn/v4/content
