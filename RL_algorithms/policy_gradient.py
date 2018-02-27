@@ -10,15 +10,15 @@ import os
 import sys
 import numpy as np
 import tensorflow as tf
-from sklearn.pipeline import FeatureUnion
-from sklearn.preprocessing import StandardScaler
-from sklearn.kernel_approximation import RBFSampler
-from sklearn.linear_model import SGDRegressor
 import matplotlib.pyplot as plt
 from datetime import datetime
+from rbf_feature_transformer import FeatureTransformer
+from RL_plots import plot_cost_to_go, plot_running_avg
+
 
 # discount on the value of future states
 GAMMA = 0.95 
+EPISODES = 3
 
 
 # creates the environment and the features used to navigate the infinite action space
@@ -41,10 +41,9 @@ def main():
     monitor_dir = './' + filename + '_' + str(datetime.now())
     env = wrappers.Monitor(env, monitor_dir)
 
-  N = 50
-  totalrewards = np.empty(N)
-  costs = np.empty(N)
-  for n in range(N):
+  totalrewards = np.empty(EPISODES)
+  costs = np.empty(EPISODES)
+  for n in range(EPISODES):
     totalreward, num_steps = play_one_td(env, policy_model, value_model)
     totalrewards[n] = totalreward
     if n % 1 == 0:
@@ -58,29 +57,6 @@ def main():
 
   plot_running_avg(totalrewards)
   plot_cost_to_go(env, value_model)
-
-
-class FeatureTransformer:
-    def __init__(self, env, n_components=500):
-        observation_examples = np.array([env.observation_space.sample() for x in range(10000)])
-        scaler = StandardScaler()
-        scaler.fit(observation_examples)
-
-        featurizer = FeatureUnion([
-                ("rbf1", RBFSampler(gamma=5.0, n_components=n_components)),
-                ("rbf2", RBFSampler(gamma=2.0, n_components=n_components)),
-                ("rbf3", RBFSampler(gamma=1.0, n_components=n_components)),
-                ("rbf4", RBFSampler(gamma=0.5, n_components=n_components))
-                ])
-        example_features = featurizer.fit_transform(scaler.transform(observation_examples))
-
-        self.dimensions = example_features.shape[1]
-        self.scaler = scaler
-        self.featurizer = featurizer
-
-    def transform(self, observations):
-        scaled = self.scaler.transform(observations)
-        return self.featurizer.transform(scaled)
 
 
 class HiddenLayer:
@@ -244,32 +220,6 @@ def play_one_td(env, pmodel, vmodel):
 
   return totalreward, iters
 
-
-def plot_cost_to_go(env, estimator, num_tiles=20):
-  x = np.linspace(env.observation_space.low[0], env.observation_space.high[0], num=num_tiles)
-  y = np.linspace(env.observation_space.low[1], env.observation_space.high[1], num=num_tiles)
-  X, Y = np.meshgrid(x, y)
-  Z = np.apply_along_axis(lambda _: -np.max(estimator.predict(_)), 2, np.dstack([X, Y]))
-
-  fig = plt.figure(figsize=(10, 5))
-  ax = fig.add_subplot(111, projection='3d')
-  surf = ax.plot_surface(X, Y, Z,
-    rstride=1, cstride=1, cmap=matplotlib.cm.coolwarm, vmin=-1.0, vmax=1.0)
-  ax.set_xlabel('Position')
-  ax.set_ylabel('Velocity')
-  ax.set_zlabel('Cost-To-Go == -V(s)')
-  ax.set_title("Cost-To-Go Function")
-  fig.colorbar(surf)
-  plt.show()
-
-def plot_running_avg(totalrewards):
-  N = len(totalrewards)
-  running_avg = np.empty(N)
-  for t in range(N):
-    running_avg[t] = totalrewards[max(0, t-100):(t+1)].mean()
-  plt.plot(running_avg)
-  plt.title("Running Average")
-  plt.show()
 
 
 ####
