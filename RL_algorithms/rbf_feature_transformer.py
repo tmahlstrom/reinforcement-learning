@@ -8,7 +8,7 @@ from sklearn.kernel_approximation import RBFSampler
 
 
 
-class FeatureTransformer:
+class RBF_FeatureTransformer:
     def __init__(self, env, n_components=400):
         observation_examples = np.array([env.observation_space.sample() for x in range(5000)])
         scaler = StandardScaler()
