@@ -1,11 +1,11 @@
 # transforms an infinite observation space into a finite array using bins
 # adaptation from Lazy Programmer Inc. https://deeplearningcourses.com/c/deep-reinforcement-learning-in-python
 
-import numpy as np
-
-
 # use to transform an feature vector with continous features into one with discrete featuers
 # e.g., transform a continuous location representation into a discrete grid-like representation
+
+import numpy as np
+
 class Bin_FeatureTransformer:
     def __init__(self, number_features, bin_per_feature = 9, range_bins = [], bias_bins = []):
         if range_bins == []:
